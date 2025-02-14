@@ -1,0 +1,35 @@
+.bubbleOuterBody {
+  display: flex;
+  flex-direction: row-reverse;
+  min-height: 50px;
+  margin: 25px 0 15px 0;
+  justify-content: end;
+}
+.innerLeftBody {
+  display: flex;
+  justify-content: end;
+  align-items: end;
+}
+.smallBubble {
+  display: block;
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background-color: #6e00ff;
+  margin-bottom: -10px;
+}
+.innerRightBody {
+  background-color: #6e00ff;
+  height: auto;
+  min-width: 50px;
+  max-width: 400px;
+  width: auto;
+  border-radius: 17px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  padding: 5px 15px;
+  font-size: 15px;
+}
