@@ -44,9 +44,12 @@
   width: 90%;
   padding: 10px 15px 10px 15px;
   border-radius: 20px;
-  overflow: scroll;
 }
-.list::-webkit-scrollbar {
+.applyScroll {
+  overflow: scroll;
+  height: 200px;
+}
+.applyScroll::-webkit-scrollbar {
   display: none;
 }
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import style from "../css/ChatBox.module.css";
 import { FiPhone } from "react-icons/fi";
 import { LuVideo } from "react-icons/lu";
@@ -9,12 +9,25 @@ import { FaMicrophone } from "react-icons/fa";
 import { MdEmojiEmotions } from "react-icons/md";
 import { CiCamera } from "react-icons/ci";
 import { IoSend } from "react-icons/io5";
-function ChatBox() {
+import { data } from "../store/ContextProvider";
+function ChatBox({ currentChat }) {
   const [msgTyped, changeMsgTyped] = useState(false);
   const [textMsg, changeTextMsg] = useState();
+  let { tempChatboxData, ws } = useContext(data);
+  let [indexOfCurrentUser, changeIndexOfUser] = useState();
 
-  const handelTextMsg = () => {
-    console.log("message sent");
+  function finndCurrentUserIndex() {
+    for (let i = 0; i < tempChatboxData.msgs.length; i++) {
+      if (tempChatboxData.msgs[i].id == currentChat.id) {
+        changeIndexOfUser(i);
+        break;
+      }
+    }
+  }
+
+  const handelTextMsgSent = () => {
+    finndCurrentUserIndex();
+    ws.emit("Messagep2pFromClient", { msg: textMsg, id: currentChat.id });
     changeTextMsg("");
     changeMsgTyped(false);
   };
@@ -27,13 +40,9 @@ function ChatBox() {
         <header className={style.chatHeader}>
           <section className={style.hleft}>
             <span className={style.userLogo}>
-              <img
-                height="80px"
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_tMDmGpdUANiBhrYP30GLPrVvcNZed4sTeA&s"
-                alt="avatar"
-              />
+              <img height="80px" src={currentChat.imgSrc} alt="avatar" />
             </span>
-            <span className={style.Username}>Anil chabra</span>
+            <span className={style.Username}>{currentChat.Name}</span>
           </section>
           <section className={style.hright}>
             <span>
@@ -55,12 +64,14 @@ function ChatBox() {
           </section>
         </header>
         <div className={style.chat_area}>
-          <ChatBubble></ChatBubble>
-          <UserChatBubble></UserChatBubble>
-          <ChatBubble></ChatBubble>
-          <UserChatBubble></UserChatBubble>
-          <ChatBubble></ChatBubble>
-          <UserChatBubble></UserChatBubble>
+          {tempChatboxData.msgs[indexOfCurrentUser] &&
+            tempChatboxData.msgs[indexOfCurrentUser].msgs.map((item) =>
+              item.recieved ? (
+                <ChatBubble data={item.recieved} />
+              ) : (
+                item.sent && <UserChatBubble data={item.sent} />
+              )
+            )}
         </div>
         <div className={style.inputArea}>
           <div className={style.attachment}>
@@ -76,8 +87,8 @@ function ChatBox() {
               placeholder="Type your message here..."
               value={textMsg}
               onChange={(e) => {
+                changeTextMsg(e.target.value);
                 if (e.target.value !== "") {
-                  changeTextMsg(e.target.value);
                   changeMsgTyped(true);
                 } else {
                   changeMsgTyped(false);
@@ -109,7 +120,7 @@ function ChatBox() {
             ) : (
               <IoSend
                 onClick={() => {
-                  handelTextMsg();
+                  handelTextMsgSent();
                 }}
               />
             )}
