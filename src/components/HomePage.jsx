@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { use, useContext, useEffect, useState } from "react";
 import style from "../css/HomePage.module.css";
 import { TiHome } from "react-icons/ti";
 import { AiFillMessage } from "react-icons/ai";
@@ -8,29 +8,40 @@ import ChatBox from "./ChatBox";
 import OnlinePeopleAndGroups from "./OnlinePeopleAndGroups";
 import { data } from "../store/ContextProvider";
 function HomePage() {
-  let { ws, updatepeopleonline } = useContext(data);
-  const [currentChat, setCurrentChat] = useState();
+  let { ws, updatepeopleonline, UpdateChatfromServer, updateChatOfid } =
+    useContext(data);
+  const [currentChat, setCurrentChat] = useState({ id: null });
 
   const openChatPanelhandler = (data) => {
     setCurrentChat(data);
   };
+  useEffect(() => {
+    updateChatOfid(currentChat.id);
+  }, [currentChat.id]);
   useEffect(() => {
     if (!ws) return;
     const handleupdateUserList = (data) => {
       updatepeopleonline(data, ws);
     };
     const handleMessagep2pFromServer = (data) => {
-      console.log(data);
+      let id = data.id;
+      UpdateChatfromServer(data);
+      console.log(
+        `id from server ${id}, id for current user ${currentChat.id}`
+      );
+      if (id == currentChat.id) {
+        updateChatOfid(id);
+      }
     };
 
     ws.on("updateUserList", handleupdateUserList);
     ws.on("Messagep2pFromServer", handleMessagep2pFromServer);
 
     return () => {
-      ws.off("updateuserList", handleupdateUserList);
+      ws.off("updateUserList", handleupdateUserList);
       ws.off("Messagep2pFromServer", handleMessagep2pFromServer);
     };
-  }, [ws]);
+  }, [ws, currentChat]);
 
   ws.on("welcome", (data) => {
     updatepeopleonline(data, ws);

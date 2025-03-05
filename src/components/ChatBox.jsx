@@ -13,21 +13,11 @@ import { data } from "../store/ContextProvider";
 function ChatBox({ currentChat }) {
   const [msgTyped, changeMsgTyped] = useState(false);
   const [textMsg, changeTextMsg] = useState();
-  let { tempChatboxData, ws } = useContext(data);
-  let [indexOfCurrentUser, changeIndexOfUser] = useState();
-
-  function finndCurrentUserIndex() {
-    for (let i = 0; i < tempChatboxData.msgs.length; i++) {
-      if (tempChatboxData.msgs[i].id == currentChat.id) {
-        changeIndexOfUser(i);
-        break;
-      }
-    }
-  }
+  let { ws, chatData, UpdateChatFromUser } = useContext(data);
 
   const handelTextMsgSent = () => {
-    finndCurrentUserIndex();
     ws.emit("Messagep2pFromClient", { msg: textMsg, id: currentChat.id });
+    UpdateChatFromUser({ id: currentChat.id, msg: textMsg });
     changeTextMsg("");
     changeMsgTyped(false);
   };
@@ -64,9 +54,9 @@ function ChatBox({ currentChat }) {
           </section>
         </header>
         <div className={style.chat_area}>
-          {tempChatboxData.msgs[indexOfCurrentUser] &&
-            tempChatboxData.msgs[indexOfCurrentUser].msgs.map((item) =>
-              item.recieved ? (
+          {chatData &&
+            chatData.msgs.map((item) =>
+              item.recieved && item.recieved ? (
                 <ChatBubble data={item.recieved} />
               ) : (
                 item.sent && <UserChatBubble data={item.sent} />
